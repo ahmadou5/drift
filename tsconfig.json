@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+  //  "module": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -19,9 +21,16 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@drift-labs/sdk": ["../drift-common/protocol/sdk"],
+      "@drift/common": ["../drift-common/common-ts/lib"],
+      "@drift-labs/react": ["../drift-common/react/lib"],
+      "@drift-labs/icons": ["../drift-common/icons"],
+      "@drift-labs/vaults-sdk": ["../drift-vaults/ts/sdk"],
+      "react": ["./node_modules/@types/react"],
+      "BN": ["./drift-common/protocol/sdk/node_modules/@types/bn.js"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.js"],
+  "exclude": ["node_modules", "drift-common"]
 }
