@@ -16,10 +16,10 @@ function PositionCard() {
       await driftUser;
       try {
         // Create an empty array to store tokens with balance > 0
-        const positions = await driftUser?.getPerpPosition(0);
-        console.log(positions?.settledPnl.toNumber() / 10e5, "order");
+        const positions = await driftUser?.getActivePerpPositions();
+        //console.log(positions?.settledPnl.toNumber() / 10e5, "order");
         // Save all tokens with balance > 0 to state
-        //setUserPosition(positions);
+        setUserPosition(positions);
       } catch (error) {
         console.error(error);
       }
