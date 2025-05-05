@@ -29,12 +29,32 @@ function SubAccountSwitcher() {
     subaccounts,
     setSubaccounts,
     setAccountLoading,
+
+    toggleAccountModal,
     accountloading,
   } = useSubaccountStore();
 
   const { driftClient, setDriftClient, resetDriftClient } = useDriftStore();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
+  const dropdownRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsExpanded(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const { publicKey, connected, disconnecting } = useWallet();
   useEffect(() => {
     if (wallet) {
@@ -166,6 +186,7 @@ function SubAccountSwitcher() {
       className={`lg:w-[374px] w-[99%] mb-0 lg:mb ${
         isExpanded ? "h-[auto]" : "h-[260px]"
       } bg-white/0 rounded-[16px] ml-auto mr-auto`}
+      ref={dropdownRef}
     >
       <div className="">
         {publicKey && (
@@ -181,7 +202,7 @@ function SubAccountSwitcher() {
                 <p className="text-white/70 font-bold text-xl">{`${
                   (activeSubAccount &&
                     decodeNumbersToWord(activeSubAccount?.name)) ||
-                  "-"
+                  "Click to Create Account"
                 }`}</p>
                 <ChevronDown color={"white"} />
               </>
@@ -200,7 +221,7 @@ function SubAccountSwitcher() {
               return (
                 <div
                   key={index}
-                  className="flex justify-between items-center p-2 border-b border-black/20"
+                  className="flex justify-between items-center p-2 px-3 mt-1 mb-1 border-b border-black/20"
                   onClick={() => {
                     handleExpand(subAccount);
                   }}
@@ -211,6 +232,22 @@ function SubAccountSwitcher() {
                 </div>
               );
             })}
+            <div className="flex justify-between items-center p-2 border-b border-black/20">
+              <Button
+                onClick={() => {
+                  toggleAccountModal();
+                  setIsExpanded(!isExpanded);
+                }}
+                variant={"outline"}
+                className="w-[40%] lg:w-[98%] bg-white/70 ml-auto mr-auto  h-10 font-bold border border-[#111d2e] rounded-xl  text-black"
+              >
+                {subaccounts?.length > 0 ? (
+                  <p>Add a new sub account</p>
+                ) : (
+                  <p>Create a sub account</p>
+                )}
+              </Button>
+            </div>
           </motion.div>
         )}
       </div>

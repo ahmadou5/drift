@@ -1,7 +1,15 @@
 "use client";
 import { Connection } from "@solana/web3.js";
-import { Wallet, DriftClient, UserAccount } from "@drift-labs/sdk";
+import {
+  Wallet,
+  DriftClient,
+  UserAccount,
+  TokenFaucet,
+  ReferrerInfo,
+  BN,
+} from "@drift-labs/sdk";
 import { PublicKey } from "@solana/web3.js";
+
 //import { ENV } from "./constants/env.constants";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { ENV } from "./constants/env.constants";
@@ -24,6 +32,99 @@ export const initializeDriftClient = async (
   });
   await driftClient.subscribe();
   return driftClient;
+};
+
+export const createNewUser = async (
+  amount: number,
+  marketIndex: number,
+  driftClient: DriftClient,
+  subAccountId: number,
+  name: string,
+  fromSubAccountId?: number,
+  referrerInfo?: ReferrerInfo,
+  donateAmount?: number,
+  txParams: {
+    computeUnitsPrice?: number;
+    skipPreflight?: boolean;
+    commitment?: string;
+    preflightCommitment?: string;
+  } = {
+    computeUnitsPrice: 10_000,
+    skipPreflight: false,
+    commitment: "confirmed",
+    preflightCommitment: "confirmed",
+  },
+  customMaxMarginRatio?: number,
+  poolId?: number
+) => {
+  const associatedTokenAccount = await driftClient.getAssociatedTokenAccount(
+    marketIndex
+  );
+  const tx = await driftClient.initializeUserAccountAndDepositCollateral(
+    new BN(amount),
+    associatedTokenAccount,
+    marketIndex,
+    subAccountId,
+    name,
+    fromSubAccountId,
+    referrerInfo,
+    new BN(donateAmount || 0),
+    txParams,
+    customMaxMarginRatio,
+    poolId
+  );
+
+  console.log(`https://explorer.solana.com/tx/${tx}?cluster=devnet`);
+  return tx;
+};
+
+export const dripUSDC = async (
+  rpcUrl: string,
+  amount: number,
+  wallet: AnchorWallet,
+  mint: PublicKey,
+  marketIndex: number,
+  driftClient: DriftClient
+) => {
+  await driftClient.subscribe();
+  const connection = new Connection(rpcUrl, "confirmed");
+  const programId = new PublicKey(
+    "V4v1mQiAdLz4qwckEb45WqHYceYizoib39cDBHSWfaB"
+  );
+
+  const associatedTokenAccount = await driftClient.getAssociatedTokenAccount(
+    marketIndex
+  );
+
+  const tokenFaucet = new TokenFaucet(connection, wallet, programId, mint, {
+    commitment: "confirmed",
+  });
+  const amountInLamports = amount * 1e6;
+  console.log("amountInLamports", amountInLamports, marketIndex);
+  try {
+    if (associatedTokenAccount) {
+      const tx = await tokenFaucet.mintToUser(
+        associatedTokenAccount,
+        new BN(amountInLamports)
+      );
+
+      console.log(`https://explorer.solana.com/tx/${tx}?cluster=devnet`);
+      return tx;
+    } else {
+      console.log("Associated token account not found");
+      const tx = await tokenFaucet.createAssociatedTokenAccountAndMintTo(
+        wallet.publicKey,
+        new BN(amountInLamports)
+      );
+      console.log("tx", tx);
+      console.log(`https://explorer.solana.com/tx/${tx}?cluster=devnet`);
+      return tx;
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.stack);
+    }
+  }
 };
 
 export const driftClient = new DriftClient({
@@ -99,6 +200,41 @@ export const getUserSubAccountNetUSD = async (
   } catch (error) {
     console.log(error);
   }
+};
+
+export const Transfer = async (
+  fromSubAccountId: number,
+  toSubAccountId: number,
+  marketIndex: number,
+  amount: number,
+  driftClient: DriftClient,
+  txParams: {
+    computeUnitsPrice?: number;
+    skipPreflight?: boolean;
+    commitment?: string;
+    preflightCommitment?: string;
+  } = {
+    computeUnitsPrice: 10_000,
+    skipPreflight: false,
+    commitment: "confirmed",
+    preflightCommitment: "confirmed",
+  }
+) => {
+  // USDC
+  const convertedAmount = driftClient.convertToSpotPrecision(
+    marketIndex,
+    amount
+  ); // $100
+
+  const tx = await driftClient.transferDeposit(
+    convertedAmount,
+    marketIndex,
+    fromSubAccountId,
+    toSubAccountId,
+    txParams
+  );
+  console.log(`https://explorer.solana.com/tx/${tx}?cluster=devnet`);
+  return tx;
 };
 
 export const Deposit = async (

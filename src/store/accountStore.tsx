@@ -11,7 +11,9 @@ interface SubaccountState {
   error: string | null;
   activeTab: number | null;
   activeBalanceTab: string;
+  transferToAccount: number;
   isDepositModalOpen: boolean;
+  isAccountModalOpen: boolean;
   isWithdrawModalOpen: boolean;
   tokenSelected: number;
   appTab: string;
@@ -23,6 +25,7 @@ interface SubaccountState {
   setAccountLoading: (accountloading: boolean) => void;
   toggleWithdrawModal: () => void;
   toggleDepositModal: () => void;
+  setTranferToAccount: (account: number) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setActiveTab: (tab: number | null) => void;
@@ -30,6 +33,7 @@ interface SubaccountState {
   setActiveBalanceTab: (tab: string) => void;
   setAppTab: (tab: string) => void;
   handleSearch: (searchInput: string) => Promise<void>;
+  toggleAccountModal: () => void;
   getActiveSubaccount: () => UserAccount | null;
 }
 
@@ -40,19 +44,24 @@ export const useSubaccountStore = create<SubaccountState>((set, get) => ({
   accountloading: false,
   error: null,
   activeTab: null,
+  transferToAccount: 0,
   activeBalanceTab: "Deposit",
   tokenSelected: 0,
   isDepositModalOpen: false,
+  isAccountModalOpen: false,
   isWithdrawModalOpen: false,
   appTab: "Balances",
   driftUser: null,
   searchInput: "arbJEWqPDYfgTFf3CdACQpZrk56tB6z7hPFc6K9KLUi",
-
+  setTranferToAccount: (account) => set({ transferToAccount: account }),
   setSearchInput: (input: string) => set({ searchInput: input }),
   setDriftUser: (user) => set({ driftUser: user }),
   setActiveSubAccount: (account) => set({ activeSubAccount: account }),
   setAppTab: (tab) => set({ appTab: tab }),
   setTokenSelected: (token) => set({ tokenSelected: token }),
+  toggleAccountModal: () => {
+    set((state) => ({ isAccountModalOpen: !state.isAccountModalOpen }));
+  },
   toggleWithdrawModal: () =>
     set((state) => ({ isWithdrawModalOpen: !state.isWithdrawModalOpen })),
   toggleDepositModal: () =>

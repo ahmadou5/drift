@@ -4,9 +4,13 @@ import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { EllipsisVertical, Pen } from "lucide-react";
 import { PerpPosition } from "@drift-labs/sdk";
+import { decodeNumbersToWord, getTokenLogo } from "@/lib/helpers.lib";
+import Image from "next/image";
+import { useDriftStore } from "@/store/driftStore";
 
 function PositionCard() {
   const { driftUser, accountloading } = useSubaccountStore();
+  const { driftClient } = useDriftStore();
   const [userPositions, setUserPosition] = React.useState<
     PerpPosition[] | undefined
   >([]);
@@ -17,7 +21,7 @@ function PositionCard() {
       try {
         // Create an empty array to store tokens with balance > 0
         const positions = await driftUser?.getActivePerpPositions();
-        //console.log(positions?.settledPnl.toNumber() / 10e5, "order");
+
         // Save all tokens with balance > 0 to state
         setUserPosition(positions);
       } catch (error) {
@@ -78,23 +82,32 @@ function PositionCard() {
                       key={i}
                     >
                       <div className="w-[12.5%] flex  justify-start">
-                        <p>{position?.marketIndex}</p>
+                        <Image
+                          src={getTokenLogo(position?.marketIndex) || ""}
+                          alt="image"
+                          height={22}
+                          className="ml-1 mr-1"
+                          width={22}
+                        />
+                        <p>{`${decodeNumbersToWord(
+                          driftClient?.getPerpMarketAccount(
+                            position?.marketIndex
+                          )?.name || [9, 0]
+                        )} `}</p>
                       </div>
                       <div className="w-[12.5%] flex flex-col items-center justify-center">
                         <p className="text-md">{`${(
-                          position?.quoteAssetAmount.toNumber() / 10e8
+                          position?.baseAssetAmount.toNumber() / 10e8
                         ).toLocaleString()}`}</p>
                         {/** TO DO USD balance of the token <p className="text-sm">{`$${20000}`}</p> */}
                       </div>
                       <div className="w-[12.5%] flex justify-center">
                         {`${(
-                          position?.quoteEntryAmount.toNumber() / 10e8
-                        ).toLocaleString()}/${(
-                          position?.quoteAssetAmount.toNumber() / 10e8
+                          position?.settledPnl.toNumber() / 10e8
                         ).toLocaleString()}`}
                       </div>
                       <div className="w-[12.5%] flex justify-center">
-                        {`$${position?.settledPnl?.toNumber() / 10e5}`}
+                        {`$${position?.openBids?.toNumber() / 10e5}`}
                       </div>
                       <div className="w-[12.5%] flex justify-center">
                         {(position.openAsks.toNumber() / 10e5).toLocaleString()}

@@ -1,0 +1,7 @@
+Daily Goals: May #5
+1. Account creation Modal it accepts user name and also amount to deposit as collaterals and if user already have an account he can transfer deposit.
+2. Make the Toast actively Working accross all componenet 
+3. create a airdrop amount condition 
+4. Have the Devnet Mainnet Switcher 
+5. Create dropdown for token Selection. on both deposit,withdraw and transfer modal //Done
+6. Add the Markets for both Mainnet and Devnet

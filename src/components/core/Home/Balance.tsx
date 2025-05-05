@@ -11,6 +11,7 @@ import Modal from "@/components/base/Modals/Modal";
 import DepositModal from "@/components/base/Modals/DepositModal";
 import WithdrawModal from "@/components/base/Modals/WithdrawModal";
 import TransferModal from "@/components/base/Modals/TransferModal";
+import CreateAccountModal from "@/components/base/Modals/CreateAccount";
 
 function Balance() {
   const {
@@ -21,6 +22,8 @@ function Balance() {
     setActiveBalanceTab,
     setTokenSelected,
     toggleDepositModal,
+    isAccountModalOpen,
+    toggleAccountModal,
   } = useSubaccountStore();
   const [userBalance, setUserBalance] = useState<string>("");
   const [showBalance, setShowBalance] = useState<boolean>(true);
@@ -172,6 +175,24 @@ function Balance() {
         </div>
         <div className="h-auto rounded-2xl mt-6 px-1 py-2 w-[100%]">
           {renderTabContent()}
+        </div>
+      </Modal>
+      <Modal isOpen={isAccountModalOpen} onClose={toggleAccountModal}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl mt-3 font-semibold">Add account</h2>
+          <button
+            onClick={() => {
+              toggleAccountModal();
+              setTokenSelected(0);
+            }}
+            className="text-gray-500 cursor-pointer hover:text-gray-700"
+            aria-label="Close"
+          >
+            <LucideX className="w-5 h-5" color={"white"} />
+          </button>
+        </div>
+        <div className="h-auto rounded-2xl mt-6 px-0 py-2 w-[100%]">
+          {<CreateAccountModal />}
         </div>
       </Modal>
     </div>
